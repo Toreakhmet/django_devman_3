@@ -38,7 +38,7 @@ where_to_go
 SECRET_KEY=your_secret_key_keep_it_in_secret
 DEBUG=true
 ALLOWED_HOSTS=127.0.0.1,localhost
-STATIC_ROOT=/path/to/static/files
+DB_NAME=db.sqlite3
 MEDIA_ROOT=/path/to/media/files
 
 ```
@@ -70,7 +70,6 @@ $ python3 manage.py runserver
 - ALLOWED_HOSTS - Список доверенных значений хост/домен. Подробнее в [документации](https://docs.djangoproject.com/en/4.1/ref/settings/#allowed-hosts
 - 
 ) Django
-- STATIC_ROOT= Описание: Путь к директории, в которой хранятся статические файлы программы.[документации](https://metanit.com/python/django/2.2.php)
 - MEDIA_ROOT= Описание:  Путь к директории, в которой хранятся медиа-файлы (например, загруженные пользователем изображения).[документации](https://django.fun/qa/372488/)
 
 Пример файла .env со значениями переменных для запуска **dev** версии сайта
@@ -78,7 +77,6 @@ $ python3 manage.py runserver
 SECRET_KEY=your_secret_key_keep_it_in_secret
 DEBUG=true
 ALLOWED_HOSTS=127.0.0.1,localhost
-STATIC_ROOT=/path/to/static/files
 MEDIA_ROOT=/path/to/media/files
 ```
 Пример файла .env со значениями переменных для запуска **prod** версии сайта
@@ -86,7 +84,6 @@ MEDIA_ROOT=/path/to/media/files
 SECRET_KEY=your_secret_key_keep_it_in_secret
 DEBUG=false
 ALLOWED_HOSTS=your_host_name_1,your_host_name_2 ...
-STATIC_ROOT=/path/to/static/files
 MEDIA_ROOT=/path/to/media/files
 ```
 Пример json файла с контентом для сайта
