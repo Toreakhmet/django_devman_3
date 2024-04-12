@@ -4,6 +4,7 @@ from urllib.parse import unquote
 import requests
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+from django.core.exceptions import MultipleObjectsReturned
 
 from places.models import Place, Image
 
@@ -19,27 +20,30 @@ class Command(BaseCommand):
             response = requests.get(url)
             response.raise_for_status()
             payload = response.json()
+            try:
+                place, created = Place.objects.get_or_create(
+                    title=payload['title'],
+                    defaults={
+                        'description_short': payload['description_short'],
+                        'description_long': payload['description_long'],
+                        'latitude': payload['coordinates']['lat'],
+                        'longitude': payload['coordinates']['lng']
+                    }
+                )
+            except MultipleObjectsReturned:
+                self.stderr.write(self.style.ERROR(
+                    f'Multiple places found with title "{payload["title"]}"'))
+                continue
 
-            place, created = Place.objects.get_or_create(
-                title=payload['title'],
-                defaults={
-                    'description_short': payload['description_short'],
-                    'description_long': payload['description_long'],
-                    'latitude': payload['coordinates']['lat'],
-                    'longitude': payload['coordinates']['lng']
-                }
-            )
-
-            for index, img_url in enumerate(payload['imgs']):
+            for index,img_url in enumerate(payload['imgs']):
                 img_response = requests.get(img_url)
                 img_response.raise_for_status()
-                content_file = ContentFile(img_response.content)
-                new_image = Image(place=place, position=index)
-                new_image.img.save(parse_img_name(img_url), content_file, save=False)
-                new_image.save()
+                file_name = Path(unquote(img_url)).name
+                Image.objects.create(
+                    place=place,
+                    img=ContentFile(img_response.content, name=file_name),
+                    position=index
+                )
 
-            self.stdout.write(self.style.SUCCESS(f'Successfully loaded url "{url}"'))
-
-
-def parse_img_name(url):
-    return Path(unquote(url)).name
+            self.stdout.write(self.style.SUCCESS(
+                f'Successfully loaded url "{url}"'))

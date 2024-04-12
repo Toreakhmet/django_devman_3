@@ -12,11 +12,12 @@ JSON_DUMPS_PARAMS = {
 
 
 def get_place(request, place_id):
-    place = get_object_or_404(Place, id=place_id)
+    place = get_object_or_404(
+        Place.objects.prefetch_related('images'), id=place_id)
 
     context = {
         "title": place.title,
-        "imgs": [],
+        "imgs": [image.img.url for image in place.images.all().order_by('position')],
         "description_short": place.description_short,
         "description_long": place.description_long,
         "coordinates": {
@@ -24,13 +25,8 @@ def get_place(request, place_id):
             "lat": place.latitude
         }
     }
-    for image in place.images.all().order_by('position'):
-        context["imgs"].append(image.img.url)
 
-    return JsonResponse(
-        context,
-        json_dumps_params=JSON_DUMPS_PARAMS
-    )
+    return JsonResponse(context)
 
 
 def home_view(request):
